@@ -9,7 +9,7 @@ $ ./create_centos7_vm.sh
 ```
 # Step 2
 ```
-$ VBoxManage startvm cl-02 --type=headless
+$ VBoxManage startvm c7-02 --type=headless
 ```
 # Step 3
 ```
