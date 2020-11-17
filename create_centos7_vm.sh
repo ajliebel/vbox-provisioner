@@ -1,4 +1,7 @@
+#!/bin/bash
+
 VM="$1"
+source ./set_env.sh
 mkdir /mnt/disk-1/shared/vbox/$VM
 VBoxManage createhd --filename /mnt/disk-1/shared/vbox/$VM/$VM.vdi --size 32768
 VBoxManage createvm --name $VM --ostype "Redhat_64" --register
@@ -6,7 +9,7 @@ VBoxManage storagectl $VM --name "SATA Controller" --add sata --controller Intel
 VBoxManage storageattach $VM --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium /mnt/disk-1/shared/vbox/$VM/$VM.vdi
 VBoxManage storagectl $VM --name "IDE Controller" --add ide
 
-VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium /mnt/disk-1/shared/software/CentOS-7-x86_64-Minimal-2003.iso
+VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $INSTALL_MEDIUM
 VBoxManage modifyvm $VM --ioapic on
 VBoxManage modifyvm $VM --boot1 dvd --boot2 disk --boot3 none --boot4 none
 VBoxManage modifyvm $VM --memory 1024 --vram 128
@@ -36,7 +39,7 @@ ssh root@$IP "yum install -y make gcc kernel-headers kernel-devel perl dkms bzip
 
 ./wait_for_ssh.sh $IP
 
-VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium /mnt/disk-1/shared/software/VBoxGuestAdditions_6.1.2.iso
+VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $GUEST_ADDITIONS_MEDIUM
 
 ssh root@$IP  mount -r /dev/cdrom /media
 ssh root@$IP /media/VBoxLinuxAdditions.run
