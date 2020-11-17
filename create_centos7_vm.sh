@@ -3,20 +3,20 @@
 VM="$1"
 source ./set_env.sh
 mkdir /mnt/disk-1/shared/vbox/$VM
-VBoxManage createhd --filename /mnt/disk-1/shared/vbox/$VM/$VM.vdi --size 32768
+VBoxManage createhd --filename /mnt/disk-1/shared/vbox/$VM/$VM.vdi --size $DISK1
 VBoxManage createvm --name $VM --ostype "Redhat_64" --register
 VBoxManage storagectl $VM --name "SATA Controller" --add sata --controller IntelAHCI
 VBoxManage storageattach $VM --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium /mnt/disk-1/shared/vbox/$VM/$VM.vdi
 VBoxManage storagectl $VM --name "IDE Controller" --add ide
 
-VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $INSTALL_MEDIUM
+#VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $INSTALL_MEDIUM
 VBoxManage modifyvm $VM --ioapic on
 VBoxManage modifyvm $VM --boot1 dvd --boot2 disk --boot3 none --boot4 none
-VBoxManage modifyvm $VM --memory 1024 --vram 128
+VBoxManage modifyvm $VM --cpus $CPU_COUNT --memory $RAM --vram $VRAM
 VBoxManage modifyvm $VM --nic1 nat --cableconnected1 on
 VBoxManage modifyvm $VM --nic2 hostonly --hostonlyadapter2 vboxnet0 --cableconnected2 on
-VBoxManage sharedfolder add $VM --name shared  --hostpath /mnt/disk-1/shared --automount --auto-mount-point /share1
-VBoxManage unattended install $VM  --iso=/mnt/disk-1/shared/software/CentOS-7-x86_64-Minimal-2003.iso --user=adrian --full-user-name=Adrian --password=foobar.123 --script-template=centos7_ks.cfg  --start-vm=headless
+VBoxManage sharedfolder add $VM --name shared  --hostpath $HOST_SHARE_PATH --automount --auto-mount-point $GUEST_MOUNT_POINT
+VBoxManage unattended install $VM  --iso=$INSTALL_MEDIUM --user=adrian --full-user-name=Adrian --password=foobar.123 --script-template=centos7_ks.cfg  --start-vm=headless
 
 MAC=`VBoxManage showvminfo $VM  --machinereadable | grep macaddress2 | sed 's/"//g' | sed -r 's/^.{12}//' | sed 's!\(..\)!\1:!g'|  sed 's!:$!!' | sed 's/./\L&/g'`
 echo "Waiting for IP bound to MAC: " $MAC
